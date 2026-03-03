@@ -23,15 +23,18 @@ Obviously nothing flashy, no blinking distractions, good contrast and readabiity
 
 Should be intuitive to the users. Which I am going to assume, are familiar with Microsoft Office.
 
-## Backend
-| Candidates        | General                                                                                                                                                                         | Language                                                                                                                                                                  | Ecosystem                                                     |
-|-------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------|
-| Express (Node.js) | Simple, sufficiently performant, well-used (20.3%, highest framework on SO dev survey)                                                                                          | TypeScript, well-used, easy to write, very good type system. <br><br> This type system can be declared on DefinitelyTyped for better developer experience on the frontend | Slonik for SQL templating and connecting to the sql instances |
-| Fastify (Node.js) | More performant than Express, more batteries included, well-used but less commonly known (3.1%) <br><br> Developers' sentiment seems to prefer Fastify because it's more modern | TypeScript                                                                                                                                                                | Same as above                                                 |
-| FastAPI (Python)  | Simple, also performant, well-used (15.1%)                                                                                                                                      | Python, _most well known language_, especially amongst researchers and clinicians , easy to write.                                                                        | Psycopg + Jinja for templating                                |
-| Axum (Rust)       | Very performant, but also very likely overkill                                                                                                                                  | Rust, slow to develop, but very resilient. Good crates support to serve as a backend API.                                                                                 |                                                               |
+From my understanding, the target audience will included people who are not tech-savvy, in which case, I would like to iterate and "playtest" with some of the users to see if they know what to do.
 
-Same safe approach to APIs
+## Backend
+| Candidates        | General                                                                                                                                                                         | Language                                                                                                                                                                  | Ecosystem                                                     | OpenAPI support |
+|-------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------|-----------------|
+| Express (Node.js) | Simple, sufficiently performant, well-used (20.3%, highest framework on SO dev survey)                                                                                          | TypeScript, well-used, easy to write, very good type system. <br><br> This type system can be declared on DefinitelyTyped for better developer experience on the frontend | Slonik for SQL templating and connecting to the sql instances | Through swagger |
+| Fastify (Node.js) | More performant than Express, more batteries included, well-used but less commonly known (3.1%) <br><br> Developers' sentiment seems to prefer Fastify because it's more modern | TypeScript                                                                                                                                                                | Same as above                                                 | Yes             |
+| FastAPI (Python)  | Simple, also performant, well-used (15.1%)                                                                                                                                      | Python, _most well known language_, especially amongst researchers and clinicians , easy to write.                                                                        | Psycopg + Jinja for templating                                | Yes             |
+
+Same safe approach to APIs as to the frontend.
+
+It is probably best to generate OpenAPI as we go. Sticking to the industry standards will prove worthwhile for both people who are trying to access this API, and to find people to maintain it in the future.
 
 ## API Documentation
 I really enjoy Neon's documentation (https://github.com/neondatabase) for it's usability and convenience to users.
@@ -46,8 +49,6 @@ Because the API documentation is expected to be mostly static, there is no need 
 |------------|---------------------------------------------------------------------------------------------------------------------------------------|
 | Next       | As much as I like Next.js, there's no denying that it's static site support is only an afterthought, however, I think it is competent |
 | Astro      | Much leaner approach, purpose-built for static sites                                                                                  |
-
-It is probably best to fulfill the OpenAPI standards. Sticking to the industry standards will prove worthwhile for both people who are trying to access this API, and to find people to maintain it in the future.
 
 ## Load balancing, Spam and DDoS protection, and other reverse proxy services
 Likely already handled by other microservices? More information is needed.
