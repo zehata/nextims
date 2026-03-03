@@ -12,18 +12,32 @@ Rust development is expensive, so this will be used in light sprinkles in necess
 # Architecture
 
 ## Frontend
-React is far and away the most well used frontend
-There is no reason to use SSR
+React is far and away the most well used frontend:
+ - It is sufficiently performant
+ - It has a huge ecosystem of libraries
+ - The market for software developers that know React is huge, making it easier to find someone to maintain
+Angular and Vue are very competent alternatives as well, but:
+ - I am not familiar as familiar with Vue as I am with React. And I have not touched on Angular before. I can definitely familiarise myself with both of them, but there are no immediate reasons that I can think of that would make React unsuitable
+ - They both have significantly lower market share of developers
+
+I don't think we should use SSR, however, because:
+ - Both the frontend we are building and the frontends that could be written by other developers would likely be internal (really?) so SEO is not a problem at all
+ - The brunt of the logic will be on the backend, it is best that we keep it as simple as possible.
+ - WIP
+
+
 | Candidates | Bundler                                                         | Developers                                           |
 |------------|-----------------------------------------------------------------|------------------------------------------------------|
 | Next       | Turbopack is more performant but only recently production-ready | Most used framework (21.5%)                          |
 | Vite       | Vite's bundler is fast and well-tested                          | Very well-used. Beloved by many for its performance. |
 
-Obviously nothing flashy, no blinking distractions, good contrast and readabiity, yet not an eyesore. _**Definitely** not going to be designed with the same theme as my portfolio page._
-
-Should be intuitive to the users. Which I am going to assume, are familiar with Microsoft Office.
-
-From my understanding, the target audience will included people who are not tech-savvy, in which case, I would like to iterate and "playtest" with some of the users to see if they know what to do.
+Because of our target audience: people who are more interested with getting the job done with the data:
+ - It will be prudent not to try anything too flashy and distracting. _**Definitely** not going to be designed with the same theme as my portfolio page._
+ - For clarity of data and stats, ensure good contrast and readabiity
+ - However, we should not pessimise the design, we should make sure it is not an eyesore.
+ - WIP
+ - Should be intuitive to the users. My assumption is that they would be familiar with Microsoft Office.
+ I think it will be nice to be able to do a mockup, and to speak to some of the people who would be the _end users_ using the app to see what they would be interested in, and gather some user feedback about things that we are planning to do, to make sure that the user would not hate the software.
 
 ## Backend
 | Candidates        | General                                                                                                                                                                         | Language                                                                                                                                                                  | Ecosystem                                                     | OpenAPI support |
@@ -32,18 +46,14 @@ From my understanding, the target audience will included people who are not tech
 | Fastify (Node.js) | More performant than Express, more batteries included, well-used but less commonly known (3.1%) <br><br> Developers' sentiment seems to prefer Fastify because it's more modern | TypeScript                                                                                                                                                                | Same as above                                                 | Yes             |
 | FastAPI (Python)  | Simple, also performant, well-used (15.1%)                                                                                                                                      | Python, _most well known language_, especially amongst researchers and clinicians , easy to write.                                                                        | Psycopg + Jinja for templating                                | Yes             |
 
-Same safe approach to APIs as to the frontend.
+I have heard about the OpenAPI standard in online forums and someone mentioned to me that I should look it up.
 
-It is probably best to generate OpenAPI as we go. Sticking to the industry standards will prove worthwhile for both people who are trying to access this API, and to find people to maintain it in the future.
+I am going to investigate if it is doable to generate OpenAPI documentation, I think it will be prudent for us to do so. Sticking to the industry standards will prove worthwhile for both people who are trying to access this API, and to find people to maintain it in the future.
 
 ## API Documentation
-I really enjoy Neon's documentation (https://github.com/neondatabase) for it's usability and convenience to users.
+At the beginning, we can use a static site generator that takes markdown files. For ease of documentation during development.
 
-Individual API endpoints have sample code which makes it very easy for people to get started and develop.
-
-For code samples, target curl, JS's fetch API and Python's requests, because these are the most commonly used and the most basic.
-
-Because the API documentation is expected to be mostly static, there is no need for us to be using a dynamic site. Definitely no backend for this (except for connecting to the backend for testing)
+I really enjoy Neon's documentation (https://github.com/neondatabase) for its convenience. Individual API endpoints have sample code which makes it very easy for people to get started and develop. I think it will be interesting to try building something like this _in the future_. For code samples, target curl, JS's fetch API and Python's requests, because these are the most commonly used and the most basic. Because the API documentation is expected to be mostly static, there is no need for us to be using a dynamic site. Definitely no backend for this (except for connecting to the backend for testing)
 
 | Candidates | Remarks                                                                                                                               |
 |------------|---------------------------------------------------------------------------------------------------------------------------------------|
