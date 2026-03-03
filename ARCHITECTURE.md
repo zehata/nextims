@@ -47,13 +47,17 @@ Because the API documentation is expected to be mostly static, there is no need 
 | Next       | As much as I like Next.js, there's no denying that it's static site support is only an afterthought, however, I think it is competent |
 | Astro      | Much leaner approach, purpose-built for static sites                                                                                  |
 
+It is probably best to fulfill the OpenAPI standards. Sticking to the industry standards will prove worthwhile for both people who are trying to access this API, and to find people to maintain it in the future.
+
 ## Load balancing, Spam and DDoS protection, and other reverse proxy services
 Likely already handled by other microservices? More information is needed.
 
 ## Information gaps
 What I currently need to investigate:
  - Kubernetes environment for testing, which is as close as I can get to OpenShift considering I don't have the node to run it myself, this will be set up on this repo.
-    - The frontend, backend and documentation services will be pulled in as dependencies 
+    - I will investigate, install and set up Minikube + Kubectl
+    - I will create very simple test apps for the frontend and backend to ensure that everything is calling each other properly
+    - The frontend, backend and documentation services will be pulled in as dependencies
  - Statically generated documentation site, with ability to pull in API definitions from the backend codebase to generate code samples
     - Also includes testing the code samples during build
  - WIP
