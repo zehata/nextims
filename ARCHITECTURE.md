@@ -10,6 +10,7 @@ Performance is likely not an issue considering that compute will likely be minim
 # Architecture
 
 ## Frontend
+### Framework
 React is far and away the most well used frontend:
  - It is sufficiently performant
  - It has a huge ecosystem of libraries
@@ -36,6 +37,14 @@ Because of our target audience: people who are more interested with getting the 
  - However, we should not pessimise the design, we should make sure it is not an eyesore.
  - Should be intuitive to the users. My current assumption is that they would be familiar with Microsoft Office. I think it will be nice to be able to do a mockup, and to speak to some of the people who would be the _end users_ using the app to see what they would be interested in, and gather some user feedback about things that we are planning to do, to make sure that our thoughts are aligned well with the end-user.
 
+### UI library
+There are a lot of UI libraries out there, for our purposes, I don't think we should be too hung up on this choice. Most of them are sufficient for our use case of a simple interface. I think our time would be better spent thinking about the product itself.
+
+However, I would prefer not to use libraries that forces us to use Tailwind, like shadcn:
+ - I found that it discourages _me_ from following best practices --- separating the styling of components and their layout
+ - If we have custom CSS atop of it, you may need to go back and forth between the layout and style files, and it will be confusing to other developers.
+ - In fact, I am looking towards removing it from my portfolio site.
+
 ## Backend
 | Candidates        | General                                                                                                                                                                                                                                            | Language                                                                          | Ecosystem for Postgres                                        | OpenAPI support |
 |-------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------|---------------------------------------------------------------|-----------------|
@@ -50,7 +59,7 @@ Because of our target audience: people who are more interested with getting the 
 
 One of the challenge that I can think of: While it is not directly linked to the backend, when initially importing this data to the Postgres instances, we might encounter database locking issue if multiple data owners are trying to upload large amount of data at the same time.
  - I am looking at ways to mitigate this, it will be prudent to run a stress test internally to inform if the implementation is sound and viable.
- - We should not assume that this only happens when initially populating the data, some data owners may upload a large batch of data at once, and we will need to ensure that we have a plan to deal with this. Depending on the scenario, it might not be prudent to simply send a "413 Content Too Large" error, because it could cause irreversible data loss. If we choose to do so, we should ensure that limits are well documented together with the API endpoint in question.
+ - We should not assume that this only happens when initially populating the data, some data owners may upload a large batch of data at once, and we will need to ensure that we have a plan to deal with this. Depending on the scenario, it might not be prudent to simply send a "413 Content Too Large" error, because it could cause irreversible data loss. If we choose to do so, and this will likely be the case at the start of development, we should ensure that limits are well documented together with the API endpoint in question.
 
 I have heard about the OpenAPI standard in online forums and someone mentioned to me that I should look it up.
 
@@ -61,10 +70,10 @@ At the beginning, we can use a static site generator that takes markdown files. 
 
 Because the API documentation is expected to be mostly static, there is no need for us to be using a dynamic site. Definitely no backend for this (except for connecting to the backend for testing)
 
-| Candidates | Remarks                                                                                                                               |
-|------------|---------------------------------------------------------------------------------------------------------------------------------------|
-| Next       | As much as I like Next.js, there's no denying that it's static site support is only an afterthought, however, I think it is competent |
-| Astro      | Much leaner approach, purpose-built for static sites.                                                                                 |
+| Candidates | Remarks                                                                                                                                                                                                                                                            |
+|------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Next       | As much as I like Next.js, there's no denying that it's static site support is only an afterthought, however, I think it is competent enough, from what I have seen<br> - Using Next may reduce the mental load for development. We'll have to see if this is true |
+| Astro      | Much leaner approach, purpose-built for static sites. I am interested in giving this a try. It is well-used for documentation sites. I have not used it, but I have heard praises about it. I might try this in my own time.                                       |
 
 ## Load balancing, Spam and DDoS protection, and other reverse proxy services
 Likely already handled by other microservices? More information is needed.
@@ -81,7 +90,11 @@ What I currently need to investigate:
  - WIP
 
 
-## MVP targets
+# MVP targets
+## Architecture
+WIP
+
+## User flow
 | Data owner                                                                                                                                                | Admin                                    | Data user                                                                                                                          |
 |-----------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------|
 |                                                                                                                                                           | Able to view and edit perms              |                                                                                                                                    |
