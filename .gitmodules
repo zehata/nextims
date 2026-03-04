@@ -1,0 +1,6 @@
+[submodule "key-operations-portal-interface"]
+	path = key-operations-portal-interface
+	url = https://gitlab.com/zehata/key-operations-portal-interface
+[submodule "translational-informatics-access-management"]
+	path = translational-informatics-access-management
+	url = https://gitlab.com/zehata/translational-informatics-access-management
