@@ -1,0 +1,20 @@
+apiVersion: skaffold/v4beta13
+kind: Config
+
+build:
+  artifacts:
+  - image: translational-informatics-access-management
+    context: translational-informatics-access-management
+  - image: key-operations-portal-interface
+    context: key-operations-portal-interface
+
+profiles:
+  - name: dev
+    activation:
+      - command: dev
+    build:
+      artifacts:
+      - image: translational-informatics-access-management
+        context: translational-informatics-access-management
+      - image: key-operations-portal-interface
+        context: key-operations-portal-interface

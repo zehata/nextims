@@ -1,0 +1,12 @@
+services:
+  kopi:
+    build: key-operations-portal-interface
+    ports:
+      - "8080:3000"
+    tty: true
+
+  tiam:
+    build: translational-informatics-access-management
+    ports:
+      - "8081:3000"
+    tty: true
