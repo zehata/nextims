@@ -71,13 +71,17 @@ Because the API documentation is expected to be mostly static, there is no need 
 | Astro      | Much leaner approach, purpose-built for static sites. I am interested in giving this a try. It is well-used for documentation sites. I have not used it, but I have heard praises about it. I might try this in my own time.                                       |
 ## Information gaps
 What I currently need to investigate:
-- Kubernetes environment for testing, which is as close as I can get to OpenShift considering I don't have the node to run it myself, this will be set up on this repo.
-- [x] I will investigate, install and set up Minikube + Kubectl
-- [x] I will create very simple test apps for the frontend and backend
-- [x] The frontend, backend and documentation services will be pulled in as dependencies
-- [ ] Add persistent Postgres storage
-- [ ] Ensure that everything is calling each other properly
-- After a better understanding of Kubernetes' functionalities, I understand that load balancing, spam and DDoS protection, and other reverse proxy services would likely be handled by other microservices on the control plane. So it is outside of the scope of this discussion.
+- ~~Kubernetes environment for testing, which is as close as I can get to OpenShift considering I don't have the node to run it myself, this will be set up on this repo.~~
+[x] After a better understanding of Kubernetes' functionalities, I understand that load balancing, spam and DDoS protection, and other reverse proxy services would likely be handled by other microservices on the control plane. So it is outside of the scope of this discussion.
+	- [x] I will investigate, install and set up Minikube + Kubectl
+	- [x] I will create very simple test apps for the frontend and backend
+	- [x] The frontend, backend and documentation services will be pulled in as dependencies
+	- [x] Add persistent Postgres storage
+	- [x] Ensure that everything is calling each other properly
+- [ ] Research further on:
+	- [ ] Other viable backend frameworks
+	- [ ] Try them out to compare the ergonomics
+
 # MVP targets
 ## Architecture
 WIP
