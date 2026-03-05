@@ -18,3 +18,5 @@ profiles:
         context: translational-informatics-access-management
       - image: key-operations-portal-interface
         context: key-operations-portal-interface
+    deploy:
+      kubeContext: nextims

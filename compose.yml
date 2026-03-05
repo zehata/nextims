@@ -10,3 +10,21 @@ services:
     ports:
       - "8081:3000"
     tty: true
+    secrets:
+      - db_password
+
+  postgres:
+    image: postgres:18-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: /run/secret/db_password
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/
+    tty: true
+    secrets:
+      - db_password
+
+secrets:
+  db_password:
+    file: db_password.txt
