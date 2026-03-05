@@ -75,6 +75,7 @@ What I currently need to investigate:
 - [x] I will investigate, install and set up Minikube + Kubectl
 - [x] I will create very simple test apps for the frontend and backend
 - [x] The frontend, backend and documentation services will be pulled in as dependencies
+- [ ] Add persistent Postgres storage
 - [ ] Ensure that everything is calling each other properly
 - After a better understanding of Kubernetes' functionalities, I understand that load balancing, spam and DDoS protection, and other reverse proxy services would likely be handled by other microservices on the control plane. So it is outside of the scope of this discussion.
 # MVP targets
