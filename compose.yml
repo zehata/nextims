@@ -2,18 +2,18 @@ services:
   key-operations-portal-interface:
     build: key-operations-portal-interface
     ports:
-      - "8080:3000"
+      - "3000:3000"
     tty: true
 
   translational-informatics-access-management:
     build: translational-informatics-access-management
     ports:
-      - "8081:3000"
+      - "8080:3000"
     tty: true
     secrets:
       - db_password
 
-  postgres:
+  translational-informatics-access-management-db:
     image: postgres:18-alpine
     ports:
       - "5432:5432"
