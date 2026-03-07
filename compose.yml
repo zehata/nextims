@@ -20,6 +20,19 @@ services:
     environment:
       POSTGRES_PASSWORD: /run/secret/db_password
     volumes:
+      - ./data/translational-informatics-access-management-db:/var/lib/postgresql/
+    tty: true
+    secrets:
+      - db_password
+
+  postgres:
+    image: postgres
+    build: postgres
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_PASSWORD: /run/secret/db_password
+    volumes:
       - ./data/postgres:/var/lib/postgresql/
     tty: true
     secrets:
