@@ -1,4 +1,12 @@
+# Secrets
 secret.yaml
 .env
+
 # Docker secrets
 **password.txt
+
+# Postgres persistent storage
+data/postgres
+
+# localstack cache
+localstack

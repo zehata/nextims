@@ -38,6 +38,14 @@ services:
     secrets:
       - db_password
 
+  s3:
+    image: localstack/localstack:s3-latest
+    ports:
+      - "4566:4566"
+    volumes:
+      - ./localstack:/var/lib/localstack
+      - /var/run/docker.sock:/var/run/docker.sock
+
 secrets:
   db_password:
     file: db_password.txt
