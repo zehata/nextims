@@ -64,13 +64,10 @@ One of the challenge that I can think of: While it is not directly linked to the
 - I am looking at ways to mitigate this, it will be prudent to run a stress test internally to inform if the implementation is sound and viable.
 - We should not assume that this only happens when initially populating the data, some data owners may upload a large batch of data at once, and we will need to ensure that we have a plan to deal with this. Depending on the scenario, it might not be prudent to simply send a "413 Content Too Large" error, because it could cause irreversible data loss. If we choose to do so, and this will likely be the case at the start of development, we should ensure that limits are well documented together with the API endpoint in question.
 
-I have heard about the OpenAPI standard in online forums and someone mentioned to me that I should look it up.
-
-I am going to investigate if it is doable to generate OpenAPI documentation, I think it will be prudent for us to do so. Sticking to the industry standards will prove worthwhile for both people who are trying to access this API, and to find people to maintain it in the future.
 ## API Documentation
 At the beginning, we can use a static site generator that takes markdown files. For ease of documentation during development.
 
-Because the API documentation is expected to be mostly static, there is no need for us to be using a dynamic site. Definitely no backend for this (except for connecting to the backend for testing)
+Because the API documentation is expected to be mostly static, there is no need for us to be using a dynamic site.
 
 | Candidates | Remarks                                                                                                                                                                                                                                                            |
 |------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -91,7 +88,28 @@ What I currently need to investigate:
 
 # MVP targets
 ## Architecture
-WIP
+```
+ ┌────────────┐               ┌────────────┐                
+ │            ├─┬────Files────►            │                
+ │ API Client │ │             │ Ingress S3 │                
+ │            ├─┼──┐          │            │                
+ └──────▲─────┘ │  │          └──┬────┬────┘                
+        │       │  │             │    │                     
+        │       │  │           Files  │                     
+        │       │  │          Created │     ┌──────────────┐
+        │       │  │             │    │     │ Unstructured │
+        │       │  │           ┌─▼─┐  │     │     Data     │
+        │       │  │ Presigned │SNS│Files ┌─►   Database   │
+        ├───────┼──┼───URLs──┐ └─┬─┘  │   │ └──────────────┘
+        │       │  │    +    │   │    │   │                 
+   ┌────▼─────┐ │  │   Data  │┌──▼────▼─┐ │ ┌──────────────┐
+   │          ├─┘  │         └┤         ◄─┘ │  Structured  │
+   │ Frontend │    │          │ Backend ◄───►     Data     │
+   │          ├────┴Requests──►         │   │   Database   │
+   └──────────┘               └─────────┘   └──────────────┘
+                           (Made with https://asciiflow.com)
+```
+
 ## User flow
 | Data owner                                                                                                                                                | Admin                                    | Data user                                                                                                                          |
 |-----------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------|
