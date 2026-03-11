@@ -8,19 +8,7 @@ services:
   translational-informatics-access-management:
     build: translational-informatics-access-management
     ports:
-      - "8080:3000"
-    tty: true
-    secrets:
-      - db_password
-
-  translational-informatics-access-management-db:
-    image: postgres:18-alpine
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_PASSWORD: /run/secret/db_password
-    volumes:
-      - ./data/translational-informatics-access-management-db:/var/lib/postgresql/
+      - "8000:8000"
     tty: true
     secrets:
       - db_password
@@ -38,13 +26,18 @@ services:
     secrets:
       - db_password
 
-  s3:
-    image: localstack/localstack:s3-latest
+  localstack:
+    image: localstack/localstack
     ports:
       - "4566:4566"
     volumes:
       - ./localstack:/var/lib/localstack
       - /var/run/docker.sock:/var/run/docker.sock
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
 
 secrets:
   db_password:

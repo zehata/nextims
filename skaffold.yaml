@@ -9,6 +9,8 @@ build:
     context: key-operations-portal-interface
   - image: postgres
     context: postgres
+  local:
+    useBuildkit: true
 
 profiles:
   - name: dev
@@ -22,5 +24,7 @@ profiles:
         context: key-operations-portal-interface
       - image: postgres
         context: postgres
+      local:
+        useBuildkit: true
     deploy:
       kubeContext: nextims

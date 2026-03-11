@@ -4,9 +4,9 @@ metadata:
   name: translational-informatics-access-management-load-balancer
 spec:
   ports:
-  - port: 8080
+  - port: 8000
     name: http
-    targetPort: 3000
+    targetPort: 8000
   type: LoadBalancer
   selector:
     app: translational-informatics-access-management
@@ -27,5 +27,12 @@ spec:
       containers:
       - name: translational-informatics-access-management
         image: translational-informatics-access-management
+        env:
+          - name: LOCALSTACK_ENDPOINT
+            value: "http://localstack:4566"
+          - name: REDIS_HOST
+            value: "redis"
+          - name: REDIS_PORT
+            value: "6379"
         ports:
-          - containerPort: 3000
+          - containerPort: 8000
