@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: translational-informatics-access-management-load-balancer
+  name: translational-informatics-access-management
 spec:
   ports:
   - port: 8000
@@ -31,7 +31,7 @@ spec:
           - name: LOCALSTACK_ENDPOINT
             value: "http://localstack:4566"
           - name: REDIS_HOST
-            value: "redis"
+            value: "api-cache"
           - name: REDIS_PORT
             value: "6379"
         ports:

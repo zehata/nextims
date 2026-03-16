@@ -1,0 +1,57 @@
+import requests
+from jwt import PyJWK
+from redis import Redis
+from app.db.authorizations import read_authorization
+from fastapi import APIRouter
+from app.typing.jwt_payload import JWTPayload
+from app.typing.token import Token
+from starlette.status import HTTP_401_UNAUTHORIZED
+from app.utils.tokens import create_access_token
+import jwt
+from fastapi import Request
+from fastapi import Response
+from typing import Annotated
+from app.typing.jwt_client_authentication_form import JWTClientAuthenticationForm
+from fastapi import Depends
+
+
+router = APIRouter(prefix="/oauth")
+
+
+@router.post("/authorize")
+async def authorize_client(
+    form_data: Annotated[JWTClientAuthenticationForm, Depends()],
+    response: Response,
+    request: Request,
+):
+    client_signed_jwt = form_data.client_assertion
+
+    payload = JWTPayload.model_validate(jwt.decode(client_signed_jwt, options={"verify_signature": False}))
+    client_id = payload.iss
+    client = read_client(client_id)
+
+    client_public_key_endpoint = client.public_key_endpoint
+    client_public_key_response = requests.get(client_public_key_endpoint)
+    client_public_key: PyJWK = PyJWK.from_json(client_public_key_response.json())
+    jwt.decode(client_signed_jwt, client_public_key)
+
+    authorization_code = form_data.code
+
+    redis_client: Redis = request.state["redis_client"]
+    authorization = read_authorization(
+        redis_client=redis_client,
+        authorization_code=authorization_code,
+    )
+    if authorization is None:
+        response.status_code = HTTP_401_UNAUTHORIZED
+        return response
+    authorized_client_id = authorization.client_id
+    if authorized_client_id != payload.iss:
+        response.status_code = HTTP_401_UNAUTHORIZED
+    access_token = create_access_token(
+        iss=str(request.url),
+        sub=authorized_client_id,
+        aud=authorized_client_id,
+        expires_delta=expires_delta,
+    )
+    return Token(access_token=access_token, token_type="bearer", expires_in=expires_delta, scope=scope)
