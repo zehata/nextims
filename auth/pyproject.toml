@@ -12,4 +12,5 @@ dependencies = [
     "pydantic>=2.12.5",
     "pyjwt[crypto]>=2.12.1",
     "redis>=7.3.0",
+    "requests>=2.32.5",
 ]

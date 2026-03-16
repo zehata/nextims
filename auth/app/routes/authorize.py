@@ -1,3 +1,4 @@
+from app.db.clients import read_client
 import requests
 from jwt import PyJWK
 from redis import Redis
@@ -27,9 +28,12 @@ async def authorize_client(
     client_signed_jwt = form_data.client_assertion
 
     payload = JWTPayload.model_validate(jwt.decode(client_signed_jwt, options={"verify_signature": False}))
+    redis_client: Redis = request.state["redis_client"]
     client_id = payload.iss
-    client = read_client(client_id)
-
+    client = read_client(redis_client, client_id)
+    if client is None:
+        response.status_code = HTTP_401_UNAUTHORIZED
+        return response
     client_public_key_endpoint = client.public_key_endpoint
     client_public_key_response = requests.get(client_public_key_endpoint)
     client_public_key: PyJWK = PyJWK.from_json(client_public_key_response.json())
@@ -37,7 +41,6 @@ async def authorize_client(
 
     authorization_code = form_data.code
 
-    redis_client: Redis = request.state["redis_client"]
     authorization = read_authorization(
         redis_client=redis_client,
         authorization_code=authorization_code,
@@ -50,8 +53,11 @@ async def authorize_client(
         response.status_code = HTTP_401_UNAUTHORIZED
     access_token = create_access_token(
         iss=str(request.url),
-        sub=authorized_client_id,
         aud=authorized_client_id,
-        expires_delta=expires_delta,
+        sub=authorization.user_id,
+        client_id=authorized_client_id,
+        expires_delta=authorization.requested_expiry_delta,
     )
-    return Token(access_token=access_token, token_type="bearer", expires_in=expires_delta, scope=scope)
+    return Token(
+        access_token=access_token, token_type="bearer", expires_in=authorization.requested_expiry_delta, scope=""
+    )

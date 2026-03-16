@@ -8,19 +8,21 @@ import jwt
 
 def create_access_token(
     iss: str,
-    sub: str,
     aud: str,
+    sub: str,
+    client_id: str,
     expires_delta: timedelta = timedelta(minutes=15),
 ):
     issued_at = datetime.now(UTC)
     expires_at = issued_at + expires_delta
     to_encode = JWTPayload.model_construct(
         iss=iss,
-        sub=sub,
-        aud=aud,
-        jti=uuid4(),
-        iat=issued_at,
         exp=expires_at,
+        aud=aud,
+        sub=sub,
+        client_id=client_id,
+        iat=issued_at,
+        jti=uuid4(),
     )
     encoded_jwt = jwt.encode(dict(to_encode), SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt

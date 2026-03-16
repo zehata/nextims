@@ -4,8 +4,9 @@ from pydantic import BaseModel
 
 class JWTPayload(BaseModel):
     iss: str
-    sub: str
-    aud: HttpUrl
-    jti: str
-    iat: str
     exp: str
+    aud: HttpUrl
+    sub: str
+    client_id: str
+    iat: str
+    jti: str

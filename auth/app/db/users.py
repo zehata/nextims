@@ -66,7 +66,7 @@ def update_user_password_or_role(
     username: str,
     password: str | None,
     role: str | None,
-) -> User | None:
+) -> None:
     hashed_username = get_password_hash(username)
     current_user_response = redis_client.hget("users", hashed_username)
     current_user = validate_redis_user_response(current_user_response)
@@ -79,7 +79,6 @@ def update_user_password_or_role(
     if role is not None:
         new_user.role = role
     redis_client.hset("users", username, mapping=dict(new_user))
-    return
 
 
 def delete_user(redis_client: Redis, username: str, password: str) -> User | None:
