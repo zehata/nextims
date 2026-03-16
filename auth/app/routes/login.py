@@ -1,48 +1,54 @@
-# redirects the user to a login page
+from fastapi.security import OAuth2PasswordRequestFormStrict
+from app.utils.clients import authenticate_client
 from app.db.users import read_user
-from app.db.authorizations import create_authorization
-from fastapi import APIRouter
-from app.constants import ALGORITHM
-from app.constants import SECRET_KEY
-import jwt
-from app.typing.token import TokenData
-from fastapi.responses import RedirectResponse
+from app.db.clients import read_client
 from fastapi import Response
+from fastapi import APIRouter
+from app.utils.tokens import create_access_token
+from fastapi import HTTPException
+from app.typing.token import Token
+from fastapi import Depends
+from typing import Annotated
 from fastapi import Request
-from redis import Redis
+from app.utils.users import authenticate_user
+from starlette.status import HTTP_401_UNAUTHORIZED
+from datetime import timedelta
+from app.constants import ACCESS_TOKEN_EXPIRE_MINUTES
 
 router = APIRouter(prefix="/oauth")
 
 
-@router.get("/login")
-async def get_login(
+@router.post("/login")
+async def user_password_login(
+    form_data: Annotated[OAuth2PasswordRequestFormStrict, Depends()],
     request: Request,
     response: Response,
-    scope: str,
-    client_id: str,
-    redirect_uri: str | None,
-    state: str | None,
-    response_type: str = "code",
-):
-    if response_type != "code":
-        response.status_code = 400
-        return response
-    access_token: str | None = request.session.get("access_token")
-    if access_token is None:
-        # Browser is not logged in
-        return RedirectResponse(url=login_url)
-    token_data = TokenData.model_validate(jwt.decode(access_token, SECRET_KEY, algorithm=ALGORITHM))
-    username = token_data.sub
+) -> Token | Response:
+    redis_client = request.state["redis_client"]
 
-    redis_client: Redis = request.state["redis_client"]
+    username = form_data.username
+    user = read_user(redis_client=redis_client, username=username)
+    user_authenticated = authenticate_user(user, form_data.password)
 
-    user = read_user(
-        redis_client=redis_client,
-        username=username,
-    )
-    authorization_code = create_authorization(
-        redis_client=redis_client,
-        user_id=user.user_id,
+    client_id = form_data.client_id
+    client = read_client(redis_client=redis_client, client_id=client_id)
+    client_authenticated = authenticate_client(client, form_data.client_secret)
+
+    if not (user and user_authenticated and client_id and client and client_authenticated):
+        raise HTTPException(
+            status_code=HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+
+    access_token = create_access_token(
+        iss=str(request.url),
+        aud="",
+        sub=user.user_id,
         client_id=client_id,
+        expires_delta=access_token_expires,
     )
-    return RedirectResponse(url=f"{redirect_uri}?code={authorization_code}&state={state}")
+    request.session["access_token"] = access_token
+    return Token(access_token=access_token, token_type="bearer")

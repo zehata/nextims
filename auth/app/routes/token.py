@@ -1,41 +1,64 @@
-# receive username and password from user
-from fastapi import APIRouter
-from app.utils.tokens import create_access_token
-from fastapi import HTTPException
-from app.typing.token import Token
-from fastapi import Depends
-from fastapi.security import OAuth2PasswordRequestForm
-from typing import Annotated
-from fastapi import Request
-from app.utils.users import authenticate_user
-from app.main import password_hash
-from starlette.status import HTTP_401_UNAUTHORIZED
 from datetime import timedelta
 from app.constants import ACCESS_TOKEN_EXPIRE_MINUTES
+from app.db.clients import read_client
+import requests
+from jwt import PyJWK
+from redis import Redis
+from app.db.authorizations import read_authorization
+from fastapi import APIRouter
+from app.typing.jwt_payload import JWTPayload
+from app.typing.token import Token
+from starlette.status import HTTP_401_UNAUTHORIZED
+from app.utils.tokens import create_access_token
+import jwt
+from fastapi import Request
+from fastapi import Response
+from typing import Annotated
+from app.typing.jwt_client_authentication_form import JWTClientAuthenticationForm
+from fastapi import Depends
+
 
 router = APIRouter(prefix="/oauth")
 
 
-@router.post("/token")
-async def login_for_access_token(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+@router.post("/authorize")
+async def authorize_client(
+    form_data: Annotated[JWTClientAuthenticationForm, Depends()],
+    response: Response,
     request: Request,
-) -> Token:
-    redis_client = request.state["redis_client"]
-    hashed_username = password_hash.hash(form_data.username)
-    user_authenticated = authenticate_user(redis_client, hashed_username, form_data.password)
-    if not user_authenticated:
-        raise HTTPException(
-            status_code=HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+):
+    client_signed_jwt = form_data.client_assertion
+
+    payload = JWTPayload.model_validate(jwt.decode(client_signed_jwt, options={"verify_signature": False}))
+    redis_client: Redis = request.state["redis_client"]
+    client_id = payload.iss
+    client = read_client(redis_client, client_id)
+    if client is None:
+        response.status_code = HTTP_401_UNAUTHORIZED
+        return response
+    client_public_key_endpoint = client.public_key_endpoint
+    client_public_key_response = requests.get(client_public_key_endpoint)
+    client_public_key: PyJWK = PyJWK.from_json(client_public_key_response.json())
+    jwt.decode(client_signed_jwt, client_public_key)
+
+    authorization_code = form_data.code
+
+    authorization = read_authorization(
+        redis_client=redis_client,
+        authorization_code=authorization_code,
+    )
+    if authorization is None:
+        response.status_code = HTTP_401_UNAUTHORIZED
+        return response
+    authorized_client_id = authorization.client_id
+    if authorized_client_id != payload.iss:
+        response.status_code = HTTP_401_UNAUTHORIZED
+    expires_delta = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         iss=str(request.url),
-        sub=hashed_username,
-        aud="",
-        expires_delta=access_token_expires,
+        aud=authorized_client_id,
+        sub=authorization.user_id,
+        client_id=authorized_client_id,
+        expires_delta=expires_delta,
     )
-    request.session["access_token"] = access_token
-    return Token(access_token=access_token, token_type="bearer")
+    return Token(access_token=access_token, token_type="bearer", expires_in=expires_delta, scope="")

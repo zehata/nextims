@@ -15,10 +15,9 @@ def validate_redis_user_response(redis_response: RedisResponse):
     return User.model_validate_json(redis_response)
 
 
-def authenticate_user(redis_client: Redis, hashed_username: str, password: str):
-    user = read_user(redis_client, hashed_username)
+def authenticate_user(user: User | None, password: str):
     if not user:
-        verify_password(password, "DUMMY_PASSWORD")
+        verify_password(password, "DUMMY_PASSWORD_TO_PREVENT_TIMING_ATTACKS")
         return False
     if not verify_password(password, user.hashed_password):
         return False

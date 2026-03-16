@@ -1,63 +1,55 @@
-from app.db.clients import read_client
-import requests
-from jwt import PyJWK
-from redis import Redis
-from app.db.authorizations import read_authorization
+# redirects the user to a login page
+from starlette.status import HTTP_400_BAD_REQUEST
+from app.exceptions.users import UserNotFound
+from app.db.users import read_user
+from app.db.authorizations import create_authorization
 from fastapi import APIRouter
-from app.typing.jwt_payload import JWTPayload
-from app.typing.token import Token
-from starlette.status import HTTP_401_UNAUTHORIZED
-from app.utils.tokens import create_access_token
+from app.constants import ALGORITHM
+from app.constants import SECRET_KEY
 import jwt
-from fastapi import Request
+from app.typing.token import TokenData
+from fastapi.responses import RedirectResponse
 from fastapi import Response
-from typing import Annotated
-from app.typing.jwt_client_authentication_form import JWTClientAuthenticationForm
-from fastapi import Depends
-
+from fastapi import Request
+from redis import Redis
 
 router = APIRouter(prefix="/oauth")
 
 
-@router.post("/authorize")
-async def authorize_client(
-    form_data: Annotated[JWTClientAuthenticationForm, Depends()],
-    response: Response,
+@router.get("/authorize")
+async def authorize(
     request: Request,
+    response: Response,
+    scope: str,
+    client_id: str,
+    redirect_uri: str | None,
+    state: str | None,
+    response_type: str = "code",
 ):
-    client_signed_jwt = form_data.client_assertion
+    if response_type != "code":
+        response.status_code = HTTP_400_BAD_REQUEST
+        return response
 
-    payload = JWTPayload.model_validate(jwt.decode(client_signed_jwt, options={"verify_signature": False}))
+    access_token: str | None = request.session.get("access_token")
+    if access_token is None:
+        # Browser is not logged in
+        return RedirectResponse(url=f"/login?scope={scope}")
+
+    token_data = TokenData.model_validate(jwt.decode(access_token, SECRET_KEY, algorithm=ALGORITHM))
+    username = token_data.sub
+
     redis_client: Redis = request.state["redis_client"]
-    client_id = payload.iss
-    client = read_client(redis_client, client_id)
-    if client is None:
-        response.status_code = HTTP_401_UNAUTHORIZED
-        return response
-    client_public_key_endpoint = client.public_key_endpoint
-    client_public_key_response = requests.get(client_public_key_endpoint)
-    client_public_key: PyJWK = PyJWK.from_json(client_public_key_response.json())
-    jwt.decode(client_signed_jwt, client_public_key)
 
-    authorization_code = form_data.code
-
-    authorization = read_authorization(
+    user = read_user(
         redis_client=redis_client,
-        authorization_code=authorization_code,
+        username=username,
     )
-    if authorization is None:
-        response.status_code = HTTP_401_UNAUTHORIZED
-        return response
-    authorized_client_id = authorization.client_id
-    if authorized_client_id != payload.iss:
-        response.status_code = HTTP_401_UNAUTHORIZED
-    access_token = create_access_token(
-        iss=str(request.url),
-        aud=authorized_client_id,
-        sub=authorization.user_id,
-        client_id=authorized_client_id,
-        expires_delta=authorization.requested_expiry_delta,
+    if user is None:
+        raise UserNotFound
+    authorization_code = create_authorization(
+        redis_client=redis_client,
+        user_id=user.user_id,
+        client_id=client_id,
+        scope=scope,
     )
-    return Token(
-        access_token=access_token, token_type="bearer", expires_in=authorization.requested_expiry_delta, scope=""
-    )
+    return RedirectResponse(url=f"{redirect_uri}?code={authorization_code}&state={state}")

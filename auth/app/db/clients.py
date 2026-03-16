@@ -21,10 +21,12 @@ def create_client(redis_client: Redis, public_key_endpoint: str) -> Client:
     return client
 
 
-def read_client(redis_client: Redis, client_id: str) -> Client | None:
+def read_client(redis_client: Redis, client_id: str | None) -> Client | None:
     hashed_client_id = get_password_hash(client_id)
     user_response = redis_client.hget("clients", hashed_client_id)
     client = validate_redis_client_response(user_response)
+    if client_id is None:
+        return None
     if client is None:
         return None
     if inspect.isawaitable(client):
