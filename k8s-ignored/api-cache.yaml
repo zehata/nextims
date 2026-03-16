@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: redis
+  name: api-cache
 spec:
   ports:
   - port: 6379
@@ -9,23 +9,23 @@ spec:
     targetPort: 6379
   type: NodePort
   selector:
-    app: redis
+    app: api-cache
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: redis
+  name: api-cache
 spec:
   selector:
     matchLabels:
-      app: redis
+      app: api-cache
   template:
     metadata:
       labels:
-        app: redis
+        app: api-cache
     spec:
       containers:
-      - name: redis
-        image: redis
+      - name: api-cache
+        image: api-cache
         ports:
           - containerPort: 6379
